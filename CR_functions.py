@@ -89,7 +89,7 @@ def YL_approx(data):
     Perps [array] - diffusion coefficient perpendicular to magnetic field
     '''
     def highM(L, MA, v):
-        lA = L / MA ** 3
+        lA = L / MA ** 2
         D = lA * v / 3
         return D, D
 
@@ -98,19 +98,19 @@ def YL_approx(data):
         Dperp = MA ** 4 * Dpar
         return Dpar, Dperp
     
-    L = data.gas['smooth'].in_units('cm')  # cell size dx
+    L = data.gas['smooth'].in_units('cm').min()  # cell size dx
     MA = data.gas['M_A0']  # Alfven mach number 
     v = con.c.to('cm / s')
     
-    Dpars = pynbody.array.SimArray(np.zeros(len(L)), 
+    Dpars = pynbody.array.SimArray(np.zeros(len(MA)), 
                                    units='cm**2 s**-1')
-    Dperps = pynbody.array.SimArray(np.zeros(len(L)), 
+    Dperps = pynbody.array.SimArray(np.zeros(len(MA)), 
                                    units='cm**2 s**-1')
     high = MA >= 1
     low = MA < 1
     
-    Dpars[high], Dperps[high] = highM(L[high], MA[high], v)
-    Dpars[low], Dperps[low] = lowM(L[low], MA[low], v)
+    Dpars[high], Dperps[high] = highM(L, MA[high], v)
+    Dpars[low], Dperps[low] = lowM(L, MA[low], v)
     
     Dpars = pynbody.array.SimArray(Dpars.in_units('cm**2 s**-1'), 
                                    units='cm**2 s**-1')
