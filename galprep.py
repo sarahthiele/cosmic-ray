@@ -87,16 +87,16 @@ def xioncalcs(data, path, output):
     c, lognH, logT2 = rd_cool(coolpath)
     
     lognHvals, logT2vals = np.meshgrid(lognH, logT2)
-    nHvals = 10 ** lognHvals
-    T2vals = 10 ** logT2vals
-    points = np.array([np.concatenate(nHvals), np.concatenate(T2vals)]).T
+    points = np.array([np.concatenate(lognHvals), np.concatenate(logT2vals)]).T
     
-    nHgal = (data.gas['rho'].in_units('g cm**-3')/co.m_p.cgs)
-    T2gal = data.gas['temp'] 
+    lognHgal = np.log10((data.gas['rho'].in_units('g cm**-3')/co.m_p.cgs).value)
+    logT2gal = np.log10(data.gas['temp'])
     
-    logxion = griddata(points, np.concatenate(c.xion), np.array([nHgal, T2gal]).T, method='nearest')
+    logxion = griddata(points, np.concatenate(c.xion), np.array([lognHgal, 
+                                                                 logT2gal]).T,
+                       method='linear')
+    
     xion = np.array(10**logxion)
-    
     data.gas['xion'] = np.array(xion)
     
     return data
